@@ -1,4 +1,4 @@
-module Model exposing (Blip, Quadrant, Radar, Ring)
+module Radar.Model exposing (Blip, Quadrant, Radar, Ring)
 
 
 type alias Radar =
