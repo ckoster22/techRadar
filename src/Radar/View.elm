@@ -1,8 +1,8 @@
 module Radar.View exposing (view)
 
 import Html exposing (Html)
-import Radar.Model exposing (Radar)
-import Svg exposing (Attribute, Svg, path, svg)
+import Radar.Model exposing (Blip, Radar, circleBlip, triangleBlip)
+import Svg exposing (Attribute, Svg, g, path, svg)
 import Svg.Attributes exposing (cx, cy, d, fill, height, r, width)
 
 
@@ -72,11 +72,16 @@ view : Radar -> Html msg
 view radar =
     svg
         [ width "800px", height "800px" ]
-        (fourRings ring1Radius ring1Color
-            |> List.append (fourRings ring2Radius ring2Color)
-            |> List.append (fourRings ring3Radius ring3Color)
-            |> List.append (fourRings ring4Radius ring4Color)
-        )
+        [ g
+            []
+            (fourRings ring1Radius ring1Color
+                |> List.append (fourRings ring2Radius ring2Color)
+                |> List.append (fourRings ring3Radius ring3Color)
+                |> List.append (fourRings ring4Radius ring4Color)
+            )
+        , triangleBlip 100 100
+        , circleBlip 100 150
+        ]
 
 
 fourRings : Float -> String -> List (Svg msg)
