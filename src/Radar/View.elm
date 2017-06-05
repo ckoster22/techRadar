@@ -1,7 +1,7 @@
 module Radar.View exposing (view)
 
 import Html exposing (Html)
-import Radar.Model exposing (Blip, Radar, circleBlip, triangleBlip)
+import Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), circleBlip, determineCoordinatesForRing, triangleBlip)
 import Svg exposing (Attribute, Svg, g, path, svg)
 import Svg.Attributes exposing (cx, cy, d, fill, height, r, width)
 
@@ -68,6 +68,269 @@ ring4Radius =
     375
 
 
+mockBlips : List Blip
+mockBlips =
+    [ { name = "tech1"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech2"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech3"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech4"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech5"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech6"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech7"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech8"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech2"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech3"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech4"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech5"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech6"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech7"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech8"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech2"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech3"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech4"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech5"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech6"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech7"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech8"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech2"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech3"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech4"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech5"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech6"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech7"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech8"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech2"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech3"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech4"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech5"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech6"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech7"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech8"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech2"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech3"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech4"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech5"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech6"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech7"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    , { name = "tech8"
+      , ring = Hold
+      , quadrant = Tools
+      , isNew = False
+      , description = "description"
+      }
+    ]
+
+
 view : Radar -> Html msg
 view radar =
     svg
@@ -79,8 +342,9 @@ view radar =
                 |> List.append (fourRings ring3Radius ring3Color)
                 |> List.append (fourRings ring4Radius ring4Color)
             )
-        , triangleBlip 100 100
-        , circleBlip 100 150
+        , g
+            []
+            (List.map triangleBlip (determineCoordinatesForRing Hold mockBlips))
         ]
 
 
