@@ -280,54 +280,6 @@ mockBlips =
       , isNew = False
       , description = "description"
       }
-    , { name = "tech8"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech2"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech3"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech4"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech5"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech6"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech7"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
-    , { name = "tech8"
-      , ring = Hold
-      , quadrant = Tools
-      , isNew = False
-      , description = "description"
-      }
     ]
 
 

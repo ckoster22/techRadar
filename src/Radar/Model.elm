@@ -99,7 +99,7 @@ findCoordForBlip ring iteration blip positions =
             else
                 RandomExtra.constant randPosition
         )
-        (randomBlipCoordinates ring 0)
+        (randomBlipCoordinates ring (-pi / 2))
 
 
 doesCoordinateCollide : Position -> List Position -> Bool
@@ -143,7 +143,9 @@ randomAngleFromRadius radius =
                 initialDelta
     in
     Random.map
-        radians
+        (\delta ->
+            pi * delta / 180
+        )
         (Random.float angleDelta (90 - angleDelta))
 
 
