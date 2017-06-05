@@ -1,7 +1,7 @@
 module Radar.View exposing (view)
 
 import Html exposing (Html)
-import Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), circleBlip, determineCoordinatesForRing, triangleBlip)
+import Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), determineCoordinatesForRing, svgForBlip)
 import Svg exposing (Attribute, Svg, g, path, svg)
 import Svg.Attributes exposing (cx, cy, d, fill, height, r, width)
 
@@ -296,7 +296,7 @@ view radar =
             )
         , g
             []
-            (List.map triangleBlip (determineCoordinatesForRing Hold mockBlips))
+            (List.map (svgForBlip True) (determineCoordinatesForRing Hold mockBlips))
         ]
 
 

@@ -1,9 +1,14 @@
-module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), circleBlip, determineCoordinatesForRing, triangleBlip)
+module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), determineCoordinatesForRing, svgForBlip)
 
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
 import Svg exposing (Svg, path)
 import Svg.Attributes exposing (d, transform)
+
+
+blipWidth : Float
+blipWidth =
+    22
 
 
 type alias Radar =
@@ -17,11 +22,6 @@ type alias Blip =
     , isNew : Bool
     , description : String
     }
-
-
-blipWidth : Float
-blipWidth =
-    22
 
 
 type Ring
@@ -38,6 +38,10 @@ type Quadrant
     | LangsAndFrameworks
 
 
+type alias Position =
+    { x : Float, y : Float }
+
+
 radiusesForRing : Ring -> ( Float, Float )
 radiusesForRing ring =
     case ring of
@@ -52,6 +56,14 @@ radiusesForRing ring =
 
         Adopt ->
             ( 0, 150 )
+
+
+svgForBlip : Bool -> Position -> Svg msg
+svgForBlip isNew position =
+    if isNew then
+        triangleBlip position
+    else
+        circleBlip position
 
 
 triangleBlip : Position -> Svg msg
@@ -109,10 +121,6 @@ doesCoordinateCollide position positions =
             (abs (currPosition.x - position.x) < blipWidth) && (abs currPosition.y - position.y < blipWidth)
         )
         positions
-
-
-type alias Position =
-    { x : Float, y : Float }
 
 
 randomBlipCoordinates : Ring -> Float -> Generator Position
