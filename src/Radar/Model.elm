@@ -1,5 +1,6 @@
 module Radar.Model exposing (Blip, Quadrant, Radar, Ring, circleBlip, triangleBlip)
 
+import Random exposing (Generator)
 import Svg exposing (Svg, path)
 import Svg.Attributes exposing (d, transform)
 
@@ -47,3 +48,45 @@ circleBlip x y =
         , transform <| "scale(" ++ toString (22 / 34) ++ ") translate(" ++ toString (-404 + x * (34 / 22) - 17) ++ ", " ++ toString (-282 + y * (34 / 22) - 17) ++ ")"
         ]
         []
+
+
+type alias Position =
+    { x : Float, y : Float }
+
+
+randomBlipCoordinates : Float -> Float -> Float -> Generator Position
+randomBlipCoordinates minRadius maxRadius startAngle =
+    Random.andThen
+        (\randRadius ->
+            Random.map
+                (toCartesian randRadius startAngle)
+                (randomAngleFromRadius randRadius)
+        )
+        (Random.float (minRadius + 11) (maxRadius - 11))
+
+
+randomAngleFromRadius : Float -> Generator Float
+randomAngleFromRadius radius =
+    let
+        initialDelta =
+            asin (11 / radius) * 180 / pi
+
+        angleDelta =
+            if initialDelta > 45 then
+                45
+            else
+                initialDelta
+    in
+    Random.float angleDelta (90 - angleDelta)
+
+
+toCartesian : Float -> Float -> Float -> Position
+toCartesian radius angle startAngle =
+    let
+        adjustX =
+            (sin << radians) startAngle - (cos << radians) startAngle
+
+        adjustY =
+            -1 * (cos << radians) startAngle - (sin << radians) startAngle
+    in
+    Position (radius * cos angle * adjustX) (radius * sin angle * adjustY)
