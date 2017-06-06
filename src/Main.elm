@@ -26,7 +26,17 @@ update : Msg -> AppState -> ( AppState, Cmd Msg )
 update msg appState =
     case msg of
         ShowMockData ->
-            ShowRadar mockRadar ! []
+            ShowRadar mockRadar
+                |> noCmd
+
+        UpdateUrl url ->
+            ShowPrompt (Just url)
+                |> noCmd
+
+
+noCmd : AppState -> ( AppState, Cmd Msg )
+noCmd appState =
+    appState ! []
 
 
 view : AppState -> Html Msg
