@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Html exposing (Html)
+import Landing.Util exposing (findSheetId)
 import Landing.View as LandingView
 import Radar.Model exposing (Quadrant(..), Radar, Ring(..))
 import Radar.View as RadarView
@@ -30,6 +31,10 @@ update msg appState =
                 |> noCmd
 
         UpdateUrl url ->
+            let
+                _ =
+                    Debug.log "sheetId" <| findSheetId url
+            in
             ShowPrompt (Just url)
                 |> noCmd
 
