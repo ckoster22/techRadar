@@ -1,9 +1,10 @@
 module Main exposing (main)
 
-import Html exposing (Html, button, text)
-import Html.Events exposing (onClick)
+import Html exposing (Html)
+import Landing.View as LandingView
 import Radar.Model exposing (Quadrant(..), Radar, Ring(..))
 import Radar.View as RadarView
+import Types exposing (AppState(..), Msg(..))
 
 
 main : Program Never AppState Msg
@@ -16,18 +17,9 @@ main =
         }
 
 
-type Msg
-    = ShowMockData
-
-
-type AppState
-    = Init
-    | ShowRadar Radar
-
-
 init : ( AppState, Cmd Msg )
 init =
-    Init ! []
+    ShowPrompt Nothing ! []
 
 
 update : Msg -> AppState -> ( AppState, Cmd Msg )
@@ -40,10 +32,8 @@ update msg appState =
 view : AppState -> Html Msg
 view appState =
     case appState of
-        Init ->
-            button
-                [ onClick ShowMockData ]
-                [ text "Show mock radar" ]
+        ShowPrompt url_ ->
+            LandingView.view url_
 
         ShowRadar radar ->
             RadarView.view radar

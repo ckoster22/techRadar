@@ -4,6 +4,7 @@ import Html exposing (Html)
 import Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), determineCoordinatesForRing, svgForBlip)
 import Svg exposing (Attribute, Svg, g, path, svg)
 import Svg.Attributes exposing (cx, cy, d, fill, height, r, width)
+import Types exposing (Msg(..))
 
 
 type RingQuadrant
@@ -68,7 +69,7 @@ ring4Radius =
     375
 
 
-view : Radar -> Html msg
+view : Radar -> Html Msg
 view radar =
     svg
         [ width "800px", height "800px" ]
@@ -85,7 +86,7 @@ view radar =
         ]
 
 
-fourRings : Float -> String -> List (Svg msg)
+fourRings : Float -> String -> List (Svg Msg)
 fourRings ringRadius ringColor =
     [ ring UpperRight ringRadius ringColor
     , ring LowerRight ringRadius ringColor
@@ -94,7 +95,7 @@ fourRings ringRadius ringColor =
     ]
 
 
-ring : RingQuadrant -> Float -> String -> Svg msg
+ring : RingQuadrant -> Float -> String -> Svg Msg
 ring quadrant ringRadius ringColor =
     case quadrant of
         UpperRight ->
@@ -110,7 +111,7 @@ ring quadrant ringRadius ringColor =
             path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 270 360, fill ringColor ] []
 
 
-arc : Float -> Float -> Float -> Float -> Float -> Attribute msg
+arc : Float -> Float -> Float -> Float -> Float -> Attribute Msg
 arc x y radius startAngle endAngle =
     let
         ( startX, startY ) =
