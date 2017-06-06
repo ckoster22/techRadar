@@ -1,4 +1,4 @@
-module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), csvToMaybeBlip, determineCoordinatesForRing, svgForBlip)
+module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), csvToMaybeBlip, determineCoordinatesForRadar, svgForBlip)
 
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
@@ -137,13 +137,13 @@ circleBlip pos =
         []
 
 
-determineCoordinatesForRing : Ring -> List Blip -> List Position
-determineCoordinatesForRing ring blips =
+determineCoordinatesForRadar : List Blip -> List Position
+determineCoordinatesForRadar blips =
     List.foldl
         (\blip acc ->
             let
                 generator =
-                    findCoordForBlip ring 0 blip acc.positions
+                    findCoordForBlip 0 blip acc.positions
 
                 ( randPos, nextSeed ) =
                     Random.step generator acc.seed
@@ -171,16 +171,16 @@ startAngleForQuadrant quadrant =
             -pi
 
 
-findCoordForBlip : Ring -> Int -> Blip -> List Position -> Generator Position
-findCoordForBlip ring iteration blip positions =
+findCoordForBlip : Int -> Blip -> List Position -> Generator Position
+findCoordForBlip iteration blip positions =
     Random.andThen
         (\randPosition ->
             if doesCoordinateCollide randPosition positions && iteration < 100 then
-                findCoordForBlip ring (iteration + 1) blip positions
+                findCoordForBlip (iteration + 1) blip positions
             else
                 RandomExtra.constant randPosition
         )
-        (randomBlipCoordinates ring (startAngleForQuadrant blip.quadrant))
+        (randomBlipCoordinates blip.ring (startAngleForQuadrant blip.quadrant))
 
 
 doesCoordinateCollide : Position -> List Position -> Bool
