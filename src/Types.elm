@@ -4,10 +4,12 @@ import Radar.Model exposing (Radar)
 
 
 type Msg
-    = ShowMockData
+    = RetrieveRadarData
+    | RetrieveRadarDataSuccess Radar
+    | RetrieveRadarDataFailure String
     | UpdateUrl String
 
 
 type AppState
-    = ShowPrompt (Maybe String)
+    = ShowPrompt (Maybe String) (Maybe String)
     | ShowRadar Radar

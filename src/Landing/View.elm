@@ -6,12 +6,13 @@ import Html.Events exposing (onClick, onInput)
 import Types exposing (Msg(..))
 
 
-view : Maybe String -> Html Msg
-view url_ =
+view : Maybe String -> Maybe String -> Html Msg
+view url_ error_ =
     div
         []
         [ urlInput <| Maybe.withDefault "" <| url_
         , showRadarButton
+        , text <| Maybe.withDefault "" <| error_
         ]
 
 
@@ -28,5 +29,5 @@ urlInput url =
 showRadarButton : Html Msg
 showRadarButton =
     button
-        [ onClick ShowMockData ]
-        [ text "Show mock radar" ]
+        [ onClick RetrieveRadarData ]
+        [ text "Show radar" ]

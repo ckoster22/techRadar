@@ -1,4 +1,4 @@
-module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), determineCoordinatesForRing, svgForBlip)
+module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), csvToMaybeBlip, determineCoordinatesForRing, svgForBlip)
 
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
@@ -40,6 +40,59 @@ type Quadrant
 
 type alias Position =
     { x : Float, y : Float }
+
+
+getRing : String -> Result String Ring
+getRing ringStr =
+    if ringStr == "hold" then
+        Ok Hold
+    else if ringStr == "assess" then
+        Ok Assess
+    else if ringStr == "trial" then
+        Ok Trial
+    else if ringStr == "adopt" then
+        Ok Adopt
+    else
+        Err <| "Invalid ring value" ++ ringStr
+
+
+getQuadrant : String -> Result String Quadrant
+getQuadrant quadrantStr =
+    if quadrantStr == "tools" then
+        Ok Tools
+    else if quadrantStr == "techniques" then
+        Ok Techniques
+    else if quadrantStr == "platforms" then
+        Ok Platforms
+    else if quadrantStr == "languages & frameworks" then
+        Ok LangsAndFrameworks
+    else
+        Err <| "Invalid quadrant value" ++ quadrantStr
+
+
+getNew : String -> Result String Bool
+getNew isNewStr =
+    if isNewStr == "TRUE" then
+        Ok True
+    else if isNewStr == "FALSE" then
+        Ok False
+    else
+        Err <| "Invalid isNew value" ++ isNewStr
+
+
+csvToMaybeBlip : String -> Maybe Blip
+csvToMaybeBlip csv =
+    case String.split "," csv of
+        name :: ringStr :: quadrantStr :: isNewStr :: description :: _ ->
+            case ( getRing ringStr, getQuadrant quadrantStr, getNew isNewStr ) of
+                ( Ok ring, Ok quadrant, Ok isNew ) ->
+                    Just <| Blip name ring quadrant isNew description
+
+                _ ->
+                    Nothing
+
+        _ ->
+            Nothing
 
 
 radiusesForRing : Ring -> ( Float, Float )
@@ -102,6 +155,22 @@ determineCoordinatesForRing ring blips =
         |> .positions
 
 
+startAngleForQuadrant : Quadrant -> Float
+startAngleForQuadrant quadrant =
+    case quadrant of
+        Tools ->
+            0
+
+        Techniques ->
+            pi / 2
+
+        Platforms ->
+            -pi / 2
+
+        LangsAndFrameworks ->
+            -pi
+
+
 findCoordForBlip : Ring -> Int -> Blip -> List Position -> Generator Position
 findCoordForBlip ring iteration blip positions =
     Random.andThen
@@ -111,7 +180,7 @@ findCoordForBlip ring iteration blip positions =
             else
                 RandomExtra.constant randPosition
         )
-        (randomBlipCoordinates ring (-pi / 2))
+        (randomBlipCoordinates ring (startAngleForQuadrant blip.quadrant))
 
 
 doesCoordinateCollide : Position -> List Position -> Bool
