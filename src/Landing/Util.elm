@@ -61,9 +61,6 @@ httpResultToMsg result =
 
 httpGetSheetById : String -> Cmd Msg
 httpGetSheetById sheetId =
-    let
-        request =
-            sheetJsonUrl sheetId
-                |> Http.getString
-    in
-    Http.send httpResultToMsg request
+    sheetJsonUrl sheetId
+        |> Http.getString
+        |> Http.send httpResultToMsg
