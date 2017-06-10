@@ -12,18 +12,12 @@ type Page
     | RadarPage RadarPage.Model
 
 
-type alias AppState =
-    { page : Page
-    , data : Maybe (List GoogleSheetBlip)
-    }
-
-
 type Msg
     = LandingPageMsg LandingPage.Msg
     | RadarPageMsg RadarPage.Msg
 
 
-main : Program Never AppState Msg
+main : Program Never Page Msg
 main =
     Html.program
         { init = init
@@ -33,33 +27,24 @@ main =
         }
 
 
-init : ( AppState, Cmd Msg )
+init : ( Page, Cmd Msg )
 init =
-    ( { page = LandingPage LandingPage.initialModel
-      , data = Nothing
-      }
-    , Cmd.none
-    )
+    ( LandingPage LandingPage.initialModel, Cmd.none )
 
 
-update : Msg -> AppState -> ( AppState, Cmd Msg )
-update msg appState =
-    updatePage appState.page msg appState
-
-
-updatePage : Page -> Msg -> AppState -> ( AppState, Cmd Msg )
-updatePage page msg appState =
+update : Msg -> Page -> ( Page, Cmd Msg )
+update msg page =
     let
         toPage toModel toMsg subUpdate subMsg subModel =
             let
                 ( newModel, newCmd ) =
                     subUpdate subMsg subModel
             in
-            ( { appState | page = toModel newModel }, Cmd.map toMsg newCmd )
+            ( toModel newModel, Cmd.map toMsg newCmd )
     in
     case ( msg, page ) of
         ( LandingPageMsg (RetrieveRadarDataSuccess blips errors_), LandingPage landingPageModel ) ->
-            ( { appState | page = RadarPage (RadarPage.Model blips Nothing errors_) }, Cmd.none )
+            ( RadarPage (RadarPage.Model blips Nothing errors_), Cmd.none )
 
         ( LandingPageMsg landingPageMsg, LandingPage landingPageModel ) ->
             toPage LandingPage LandingPageMsg LandingPage.update landingPageMsg landingPageModel
@@ -68,14 +53,14 @@ updatePage page msg appState =
             toPage RadarPage RadarPageMsg RadarPage.update radarPageMsg radarPageModel
 
         ( _, _ ) ->
-            appState ! []
+            page ! []
 
 
-view : AppState -> Html Msg
-view appState =
+view : Page -> Html Msg
+view page =
     let
         appView =
-            viewPage False appState.page
+            viewPage False page
     in
     -- https://github.com/elm-lang/elm-reactor/issues/138
     elmReactorCssWorkaround appView
