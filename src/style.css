@@ -23,3 +23,9 @@
 .quad-techniques {
     fill: #1EBCCD;
 }
+
+.blip {
+    font-size: 10px;
+    font-style: italic;
+    fill: #FFFFFF;
+}

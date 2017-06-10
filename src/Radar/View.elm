@@ -82,7 +82,15 @@ blipsGrouping blips quadrant =
         [ class <| classForQuadrant quadrant ]
         (blips
             |> determineCoordinatesForRadar
-            |> List.map svgForBlip
+            |> List.map
+                (\blip ->
+                    case blip.position_ of
+                        Just position ->
+                            svgForBlip position blip.rowNum blip.isNew
+
+                        Nothing ->
+                            Svg.text ""
+                )
         )
 
 

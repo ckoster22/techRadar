@@ -2,8 +2,8 @@ module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), csvToMaybeBlip
 
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
-import Svg exposing (Svg, path, text)
-import Svg.Attributes exposing (d, transform)
+import Svg exposing (Svg, g, path, text, text_)
+import Svg.Attributes exposing (class, d, transform, x, y)
 
 
 blipWidth : Float
@@ -83,12 +83,12 @@ getNew isNewStr =
 
 
 csvToMaybeBlip : String -> Int -> Maybe Blip
-csvToMaybeBlip csv index =
+csvToMaybeBlip csv rowNum =
     case String.split "," csv of
         name :: ringStr :: quadrantStr :: isNewStr :: description :: _ ->
             case ( getRing ringStr, getQuadrant quadrantStr, getNew isNewStr ) of
                 ( Ok ring, Ok quadrant, Ok isNew ) ->
-                    Just <| Blip name index ring quadrant isNew description Nothing
+                    Just <| Blip name rowNum ring quadrant isNew description Nothing
 
                 _ ->
                     Nothing
@@ -113,24 +113,25 @@ radiusesForRing ring =
             ( 0, 150 )
 
 
-
--- svgForBlips : List Blip -> List (Svg msg)
--- svgForBlips blips =
---     List.map
-
-
-svgForBlip : Blip -> Svg msg
-svgForBlip blip =
-    case blip.position_ of
-        Just position ->
-            if blip.isNew then
+svgForBlip : Position -> Int -> Bool -> Svg msg
+svgForBlip position rowNum isNew =
+    let
+        blipPathSvg =
+            if isNew then
                 triangleBlip position
             else
                 circleBlip position
-
-        Nothing ->
-            -- TODO: this shouldn't be possible.. fix it
-            text ""
+    in
+    g
+        []
+        [ blipPathSvg
+        , text_
+            [ class "blip"
+            , x <| toString (position.x - 4)
+            , y <| toString (position.y + 2)
+            ]
+            [ text <| toString rowNum ]
+        ]
 
 
 triangleBlip : Position -> Svg msg
