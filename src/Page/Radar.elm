@@ -1,7 +1,7 @@
 module Page.Radar exposing (Model, Msg, update, view)
 
 import Data.Radar exposing (Blip, Position, Quadrant(..), Ring(..))
-import Html exposing (Html)
+import Html exposing (Html, div, p)
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
 import Svg exposing (Attribute, Svg, g, path, svg, text, text_)
@@ -12,6 +12,7 @@ import Svg.Events exposing (onMouseOut, onMouseOver)
 type alias Model =
     { blips : List Blip
     , highlightedQuadrant_ : Maybe Quadrant
+    , errors_ : Maybe (List String)
     }
 
 
@@ -89,23 +90,39 @@ view model =
         langsAndFrameworksBlips =
             List.filter (\blip -> blip.quadrant == LangsAndFrameworks) model.blips
     in
-    svg
-        [ width "800px", height "800px" ]
-        [ g
-            []
-            [ quadrant Tools model.highlightedQuadrant_
-            , quadrant Techniques model.highlightedQuadrant_
-            , quadrant Platforms model.highlightedQuadrant_
-            , quadrant LangsAndFrameworks model.highlightedQuadrant_
-            ]
-        , g
-            []
-            [ blipsGrouping toolsBlips Tools
-            , blipsGrouping techniquesBlips Techniques
-            , blipsGrouping platformsBlips Platforms
-            , blipsGrouping langsAndFrameworksBlips LangsAndFrameworks
+    div
+        []
+        [ errorSection model.errors_
+        , svg
+            [ width "800px", height "800px" ]
+            [ g
+                []
+                [ quadrant Tools model.highlightedQuadrant_
+                , quadrant Techniques model.highlightedQuadrant_
+                , quadrant Platforms model.highlightedQuadrant_
+                , quadrant LangsAndFrameworks model.highlightedQuadrant_
+                ]
+            , g
+                []
+                [ blipsGrouping toolsBlips Tools
+                , blipsGrouping techniquesBlips Techniques
+                , blipsGrouping platformsBlips Platforms
+                , blipsGrouping langsAndFrameworksBlips LangsAndFrameworks
+                ]
             ]
         ]
+
+
+errorSection : Maybe (List String) -> Html Msg
+errorSection errors_ =
+    case Debug.log "errors" errors_ of
+        Just errors ->
+            div
+                []
+                (List.map (\error -> p [] [ text error ]) errors)
+
+        Nothing ->
+            text ""
 
 
 blipsGrouping : List Blip -> Quadrant -> Svg Msg

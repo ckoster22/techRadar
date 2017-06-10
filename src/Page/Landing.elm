@@ -22,7 +22,7 @@ initialModel =
 
 type Msg
     = RetrieveRadarData
-    | RetrieveRadarDataSuccess (List Blip)
+    | RetrieveRadarDataSuccess (List Blip) (Maybe (List String))
     | RetrieveRadarDataFailure String
     | UpdateUrl String
 
@@ -38,12 +38,12 @@ update msg model =
                 Err error ->
                     { model | error_ = Just error } ! []
 
-        RetrieveRadarDataSuccess radar ->
+        RetrieveRadarDataSuccess _ _ ->
             -- This is handled in Main.elm
             model ! []
 
         RetrieveRadarDataFailure error ->
-            { model | error_ = Debug.log "error" <| Just error } ! []
+            { model | error_ = Just error } ! []
 
         UpdateUrl url ->
             { model | url = url } ! []
@@ -72,7 +72,7 @@ sheetJsonUrl sheetId =
 
 httpResultToMsg : Result Http.Error String -> Msg
 httpResultToMsg result =
-    case Debug.log "result" result of
+    case result of
         Ok csv ->
             let
                 sheetRows =
@@ -83,21 +83,26 @@ httpResultToMsg result =
                         _ ->
                             []
 
-                blips =
+                ( blips, errors ) =
                     List.foldl
-                        (\row ( blips, index ) ->
-                            case csvToMaybeBlip row index of
-                                Just blip ->
-                                    ( blip :: blips, index + 1 )
+                        (\row ( blips, errors, index ) ->
+                            case csvToBlipResult row index of
+                                Ok blip ->
+                                    ( blip :: blips, errors, index + 1 )
 
-                                Nothing ->
-                                    ( blips, index + 1 )
+                                Err error ->
+                                    ( blips, error :: errors, index + 1 )
                         )
-                        ( [], 0 )
+                        ( [], [], 0 )
                         sheetRows
-                        |> Tuple.first
+                        |> (\( blips, errors, _ ) ->
+                                if List.length errors == 0 then
+                                    ( blips, Nothing )
+                                else
+                                    ( blips, Just errors )
+                           )
             in
-            RetrieveRadarDataSuccess blips
+            RetrieveRadarDataSuccess blips errors
 
         Err httpError ->
             RetrieveRadarDataFailure "Unable to retrieve Google Sheet"
@@ -110,19 +115,19 @@ httpGetSheetById sheetId =
         |> Http.send httpResultToMsg
 
 
-csvToMaybeBlip : String -> Int -> Maybe Blip
-csvToMaybeBlip csv rowNum =
+csvToBlipResult : String -> Int -> Result String Blip
+csvToBlipResult csv rowNum =
     case String.split "," csv of
         name :: ringStr :: quadrantStr :: isNewStr :: description :: _ ->
             case ( getRing ringStr, getQuadrant quadrantStr, getNew isNewStr ) of
                 ( Ok ring, Ok quadrant, Ok isNew ) ->
-                    Just <| Blip name rowNum ring quadrant isNew description Nothing
+                    Ok <| Blip name rowNum ring quadrant isNew description Nothing
 
                 _ ->
-                    Nothing
+                    Err <| "Row found with at least one unexpected value: " ++ csv
 
         _ ->
-            Nothing
+            Err <| "Row is not in the correct format: " ++ csv
 
 
 getRing : String -> Result String Ring
