@@ -11,6 +11,9 @@
     fill: #EEEEEE;
 }
 
+.quad {
+    cursor: pointer;
+}
 .quad-tools {
     fill: #86B782;
 }

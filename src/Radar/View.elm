@@ -98,7 +98,7 @@ blipsGrouping blips quadrant =
 quadrant : Quadrant -> Maybe Quadrant -> Svg Msg
 quadrant quadrant highlightQuadrant_ =
     g
-        [ class <| classForQuadrant quadrant ++ classForHighlight quadrant highlightQuadrant_
+        [ class <| "quad " ++ classForQuadrant quadrant ++ classForHighlight quadrant highlightQuadrant_
         , onMouseOver <| MouseoverQuadrant quadrant
         , onMouseOut <| MouseoutQuadrant
         ]
