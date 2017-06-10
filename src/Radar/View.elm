@@ -80,7 +80,10 @@ blipsGrouping : List Blip -> Quadrant -> Svg Msg
 blipsGrouping blips quadrant =
     g
         [ class <| classForQuadrant quadrant ]
-        (List.map (svgForBlip True) (determineCoordinatesForRadar blips))
+        (blips
+            |> determineCoordinatesForRadar
+            |> List.map svgForBlip
+        )
 
 
 quadrant : Quadrant -> Svg Msg

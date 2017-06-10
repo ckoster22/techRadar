@@ -2,7 +2,7 @@ module Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), csvToMaybeBlip
 
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
-import Svg exposing (Svg, path)
+import Svg exposing (Svg, path, text)
 import Svg.Attributes exposing (d, transform)
 
 
@@ -22,6 +22,7 @@ type alias Blip =
     , quadrant : Quadrant
     , isNew : Bool
     , description : String
+    , position_ : Maybe Position
     }
 
 
@@ -87,7 +88,7 @@ csvToMaybeBlip csv index =
         name :: ringStr :: quadrantStr :: isNewStr :: description :: _ ->
             case ( getRing ringStr, getQuadrant quadrantStr, getNew isNewStr ) of
                 ( Ok ring, Ok quadrant, Ok isNew ) ->
-                    Just <| Blip name index ring quadrant isNew description
+                    Just <| Blip name index ring quadrant isNew description Nothing
 
                 _ ->
                     Nothing
@@ -112,12 +113,24 @@ radiusesForRing ring =
             ( 0, 150 )
 
 
-svgForBlip : Bool -> Position -> Svg msg
-svgForBlip isNew position =
-    if isNew then
-        triangleBlip position
-    else
-        circleBlip position
+
+-- svgForBlips : List Blip -> List (Svg msg)
+-- svgForBlips blips =
+--     List.map
+
+
+svgForBlip : Blip -> Svg msg
+svgForBlip blip =
+    case blip.position_ of
+        Just position ->
+            if blip.isNew then
+                triangleBlip position
+            else
+                circleBlip position
+
+        Nothing ->
+            -- TODO: this shouldn't be possible.. fix it
+            text ""
 
 
 triangleBlip : Position -> Svg msg
@@ -138,22 +151,29 @@ circleBlip pos =
         []
 
 
-determineCoordinatesForRadar : List Blip -> List Position
+determineCoordinatesForRadar : List Blip -> List Blip
 determineCoordinatesForRadar blips =
     List.foldl
-        (\blip acc ->
+        (\blip ( accBlips, seed ) ->
             let
                 generator =
-                    findCoordForBlip 0 blip acc.positions
+                    accBlips
+                        |> List.concatMap
+                            (\blip ->
+                                blip.position_
+                                    |> Maybe.map (\position -> [ position ])
+                                    |> Maybe.withDefault []
+                            )
+                        |> findCoordForBlip 0 blip
 
-                ( randPos, nextSeed ) =
-                    Random.step generator acc.seed
+                ( randBlip, nextSeed ) =
+                    Random.step generator seed
             in
-            { acc | positions = randPos :: acc.positions, seed = nextSeed }
+            ( randBlip :: accBlips, nextSeed )
         )
-        { positions = [], seed = Random.initialSeed 12345 }
+        ( [], Random.initialSeed 12345 )
         blips
-        |> .positions
+        |> Tuple.first
 
 
 startAngleForQuadrant : Quadrant -> Float
@@ -172,14 +192,14 @@ startAngleForQuadrant quadrant =
             -pi
 
 
-findCoordForBlip : Int -> Blip -> List Position -> Generator Position
+findCoordForBlip : Int -> Blip -> List Position -> Generator Blip
 findCoordForBlip iteration blip positions =
     Random.andThen
         (\randPosition ->
             if doesCoordinateCollide randPosition positions && iteration < 100 then
                 findCoordForBlip (iteration + 1) blip positions
             else
-                RandomExtra.constant randPosition
+                { blip | position_ = Just randPosition } |> RandomExtra.constant
         )
         (randomBlipCoordinates blip.ring (startAngleForQuadrant blip.quadrant))
 
