@@ -115,7 +115,7 @@ view model =
 
 errorSection : Maybe (List String) -> Html Msg
 errorSection errors_ =
-    case Debug.log "errors" errors_ of
+    case errors_ of
         Just errors ->
             div
                 []

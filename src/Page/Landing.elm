@@ -12,12 +12,13 @@ import Regex exposing (HowMany(..), Match, Regex, find, regex)
 type alias Model =
     { url : String
     , error_ : Maybe String
+    , isLoading : Bool
     }
 
 
 initialModel : Model
 initialModel =
-    Model "" Nothing
+    Model "" Nothing False
 
 
 type Msg
@@ -33,7 +34,7 @@ update msg model =
         RetrieveRadarData ->
             case findSheetId model.url of
                 Ok url ->
-                    model ! [ httpGetSheetById url ]
+                    { model | isLoading = True } ! [ httpGetSheetById url ]
 
                 Err error ->
                     { model | error_ = Just error } ! []
@@ -43,7 +44,7 @@ update msg model =
             model ! []
 
         RetrieveRadarDataFailure error ->
-            { model | error_ = Just error } ! []
+            { model | error_ = Just error, isLoading = False } ! []
 
         UpdateUrl url ->
             { model | url = url } ! []
@@ -177,7 +178,7 @@ view model =
     div
         []
         [ urlInput model.url
-        , showRadarButton
+        , showRadarButton model.isLoading
         , text <| Maybe.withDefault "" <| model.error_
         ]
 
@@ -192,8 +193,16 @@ urlInput url =
         []
 
 
-showRadarButton : Html Msg
-showRadarButton =
+showRadarButton : Bool -> Html Msg
+showRadarButton isLoading =
     button
         [ onClick RetrieveRadarData ]
-        [ text "Show radar" ]
+        [ text <| buttonText isLoading ]
+
+
+buttonText : Bool -> String
+buttonText isLoading =
+    if isLoading then
+        "Please wait.."
+    else
+        "Show radar"
