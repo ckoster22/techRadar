@@ -1,6 +1,6 @@
 module Page.Landing exposing (Model, Msg(..), initialModel, update, view)
 
-import Data.Radar exposing (Blip, Quadrant(..), Ring(..))
+import Data.Radar exposing (GoogleSheetBlip, Quadrant(..), Ring(..))
 import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -23,7 +23,7 @@ initialModel =
 
 type Msg
     = RetrieveRadarData
-    | RetrieveRadarDataSuccess (List Blip) (Maybe (List String))
+    | RetrieveRadarDataSuccess (List GoogleSheetBlip) (Maybe (List String))
     | RetrieveRadarDataFailure String
     | UpdateUrl String
 
@@ -116,13 +116,13 @@ httpGetSheetById sheetId =
         |> Http.send httpResultToMsg
 
 
-csvToBlipResult : String -> Int -> Result String Blip
+csvToBlipResult : String -> Int -> Result String GoogleSheetBlip
 csvToBlipResult csv rowNum =
     case String.split "," csv of
         name :: ringStr :: quadrantStr :: isNewStr :: description :: _ ->
             case ( getRing ringStr, getQuadrant quadrantStr, getNew isNewStr ) of
                 ( Ok ring, Ok quadrant, Ok isNew ) ->
-                    Ok <| Blip name rowNum ring quadrant isNew description Nothing
+                    Ok <| GoogleSheetBlip name rowNum ring quadrant isNew description
 
                 _ ->
                     Err <| "Row found with at least one unexpected value: " ++ csv

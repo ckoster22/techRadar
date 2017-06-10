@@ -1,14 +1,13 @@
-module Data.Radar exposing (Blip, Position, Quadrant(..), Ring(..))
+module Data.Radar exposing (GoogleSheetBlip, Quadrant(..), Ring(..))
 
 
-type alias Blip =
+type alias GoogleSheetBlip =
     { name : String
     , rowNum : Int
     , ring : Ring
     , quadrant : Quadrant
     , isNew : Bool
     , description : String
-    , position_ : Maybe Position
     }
 
 
@@ -24,7 +23,3 @@ type Ring
     | Assess
     | Trial
     | Adopt
-
-
-type alias Position =
-    { x : Float, y : Float }

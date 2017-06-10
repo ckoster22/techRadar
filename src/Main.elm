@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Data.Radar exposing (Blip)
+import Data.Radar exposing (GoogleSheetBlip)
 import Html exposing (Html, div)
 import Html.Attributes
 import Page.Landing as LandingPage exposing (Msg(..))
@@ -14,7 +14,7 @@ type Page
 
 type alias AppState =
     { page : Page
-    , data : Maybe (List Blip)
+    , data : Maybe (List GoogleSheetBlip)
     }
 
 

@@ -1,6 +1,6 @@
 module Page.Radar exposing (Model, Msg, update, view)
 
-import Data.Radar exposing (Blip, Position, Quadrant(..), Ring(..))
+import Data.Radar exposing (GoogleSheetBlip, Quadrant(..), Ring(..))
 import Html exposing (Html, div, p)
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
@@ -10,10 +10,20 @@ import Svg.Events exposing (onMouseOut, onMouseOver)
 
 
 type alias Model =
-    { blips : List Blip
+    { blips : List GoogleSheetBlip
     , highlightedQuadrant_ : Maybe Quadrant
     , errors_ : Maybe (List String)
     }
+
+
+type alias PositionedBlip =
+    { sheetBlip : GoogleSheetBlip
+    , position : Position
+    }
+
+
+type alias Position =
+    { x : Float, y : Float }
 
 
 type Msg
@@ -125,7 +135,7 @@ errorSection errors_ =
             text ""
 
 
-blipsGrouping : List Blip -> Quadrant -> Svg Msg
+blipsGrouping : List GoogleSheetBlip -> Quadrant -> Svg Msg
 blipsGrouping blips quadrant =
     g
         [ class <| classForQuadrant quadrant ]
@@ -133,12 +143,7 @@ blipsGrouping blips quadrant =
             |> determineCoordinatesForRadar
             |> List.map
                 (\blip ->
-                    case blip.position_ of
-                        Just position ->
-                            svgForBlip position blip.rowNum blip.isNew
-
-                        Nothing ->
-                            Svg.text ""
+                    svgForBlip blip.position blip.sheetBlip.rowNum blip.sheetBlip.isNew
                 )
         )
 
@@ -296,19 +301,14 @@ circleBlip pos =
         []
 
 
-determineCoordinatesForRadar : List Blip -> List Blip
+determineCoordinatesForRadar : List GoogleSheetBlip -> List PositionedBlip
 determineCoordinatesForRadar blips =
     List.foldl
         (\blip ( accBlips, seed ) ->
             let
                 generator =
                     accBlips
-                        |> List.concatMap
-                            (\blip ->
-                                blip.position_
-                                    |> Maybe.map (\position -> [ position ])
-                                    |> Maybe.withDefault []
-                            )
+                        |> List.map .position
                         |> findCoordForBlip 0 blip
 
                 ( randBlip, nextSeed ) =
@@ -337,14 +337,14 @@ startAngleForQuadrant quadrant =
             -pi
 
 
-findCoordForBlip : Int -> Blip -> List Position -> Generator Blip
+findCoordForBlip : Int -> GoogleSheetBlip -> List Position -> Generator PositionedBlip
 findCoordForBlip iteration blip positions =
     Random.andThen
         (\randPosition ->
             if doesCoordinateCollide randPosition positions && iteration < 100 then
                 findCoordForBlip (iteration + 1) blip positions
             else
-                { blip | position_ = Just randPosition } |> RandomExtra.constant
+                PositionedBlip blip randPosition |> RandomExtra.constant
         )
         (randomBlipCoordinates blip.ring (startAngleForQuadrant blip.quadrant))
 
