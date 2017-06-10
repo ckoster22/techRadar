@@ -1,12 +1,26 @@
 module Main exposing (main)
 
+import Data.Radar exposing (Blip)
 import Html exposing (Html, div)
 import Html.Attributes
-import Landing.Util exposing (findSheetId, httpGetSheetById)
-import Landing.View as LandingView
-import Radar.Model exposing (Quadrant(..), Radar, Ring(..))
-import Radar.View as RadarView
-import Types exposing (AppState(..), Msg(..))
+import Page.Landing as LandingPage exposing (Msg(..))
+import Page.Radar as RadarPage
+
+
+type Page
+    = LandingPage LandingPage.Model
+    | RadarPage RadarPage.Model
+
+
+type alias AppState =
+    { page : Page
+    , data : Maybe (List Blip)
+    }
+
+
+type Msg
+    = LandingPageMsg LandingPage.Msg
+    | RadarPageMsg RadarPage.Msg
 
 
 main : Program Never AppState Msg
@@ -21,71 +35,62 @@ main =
 
 init : ( AppState, Cmd Msg )
 init =
-    ShowPrompt (Just "https://docs.google.com/spreadsheets/d/11Fd0lwNIEUs2ymxNEiTfpM5CoQHQbMuOId8TjrQHDn0/edit#gid=0") Nothing ! []
+    ( { page = LandingPage LandingPage.initialModel
+      , data = Nothing
+      }
+    , Cmd.none
+    )
 
 
 update : Msg -> AppState -> ( AppState, Cmd Msg )
 update msg appState =
-    case msg of
-        RetrieveRadarData ->
-            case appState of
-                ShowPrompt (Just url) _ ->
-                    let
-                        cmd =
-                            findSheetId url
-                                |> Maybe.map httpGetSheetById
-                                |> Maybe.withDefault Cmd.none
-                    in
-                    appState ! [ cmd ]
-
-                _ ->
-                    appState |> noCmd
-
-        RetrieveRadarDataSuccess radar ->
-            ShowRadar radar Nothing |> noCmd
-
-        RetrieveRadarDataFailure _ ->
-            -- TODO: handle this case
-            appState |> noCmd
-
-        UpdateUrl url ->
-            ShowPrompt (Just url) Nothing |> noCmd
-
-        MouseoverQuadrant quadrant ->
-            case appState of
-                ShowRadar radar _ ->
-                    ShowRadar radar (Just quadrant) |> noCmd
-
-                _ ->
-                    appState |> noCmd
-
-        MouseoutQuadrant ->
-            case appState of
-                ShowRadar radar _ ->
-                    ShowRadar radar Nothing |> noCmd
-
-                _ ->
-                    appState |> noCmd
+    updatePage appState.page msg appState
 
 
-noCmd : AppState -> ( AppState, Cmd Msg )
-noCmd appState =
-    appState ! []
+updatePage : Page -> Msg -> AppState -> ( AppState, Cmd Msg )
+updatePage page msg appState =
+    let
+        toPage toModel toMsg subUpdate subMsg subModel =
+            let
+                ( newModel, newCmd ) =
+                    subUpdate subMsg subModel
+            in
+            ( { appState | page = toModel newModel }, Cmd.map toMsg newCmd )
+    in
+    case ( msg, page ) of
+        ( LandingPageMsg (RetrieveRadarDataSuccess blips), LandingPage landingPageModel ) ->
+            ( { appState | page = RadarPage (RadarPage.Model blips Nothing) }, Cmd.none )
+
+        ( LandingPageMsg landingPageMsg, LandingPage landingPageModel ) ->
+            toPage LandingPage LandingPageMsg LandingPage.update landingPageMsg landingPageModel
+
+        ( RadarPageMsg radarPageMsg, RadarPage radarPageModel ) ->
+            toPage RadarPage RadarPageMsg RadarPage.update radarPageMsg radarPageModel
+
+        ( _, _ ) ->
+            appState ! []
 
 
 view : AppState -> Html Msg
 view appState =
     let
         appView =
-            case appState of
-                ShowPrompt url_ error_ ->
-                    LandingView.view url_ error_
-
-                ShowRadar radar highlightQuadrant_ ->
-                    RadarView.view radar highlightQuadrant_
+            viewPage False appState.page
     in
     -- https://github.com/elm-lang/elm-reactor/issues/138
     elmReactorCssWorkaround appView
+
+
+viewPage : Bool -> Page -> Html Msg
+viewPage isLoading page =
+    case page of
+        LandingPage model ->
+            LandingPage.view model
+                |> Html.map LandingPageMsg
+
+        RadarPage model ->
+            RadarPage.view model
+                |> Html.map RadarPageMsg
 
 
 elmReactorCssWorkaround : Html Msg -> Html Msg
