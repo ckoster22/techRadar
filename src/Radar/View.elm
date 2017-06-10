@@ -7,13 +7,6 @@ import Svg.Attributes exposing (class, cx, cy, d, fill, height, r, width)
 import Types exposing (Msg(..))
 
 
-type RingQuadrant
-    = UpperRight
-    | LowerRight
-    | LowerLeft
-    | UpperLeft
-
-
 radarCx : Float
 radarCx =
     400
@@ -22,12 +15,6 @@ radarCx =
 radarCy : Float
 radarCy =
     400
-
-
-
--- ring1Color : String
--- ring1Color =
---     "#BABABA"
 
 
 ringPadding : Float
@@ -40,32 +27,14 @@ ring1Radius =
     150
 
 
-
--- ring2Color : String
--- ring2Color =
---     "#CACACA"
-
-
 ring2Radius : Float
 ring2Radius =
     250
 
 
-
--- ring3Color : String
--- ring3Color =
---     "#DADADA"
-
-
 ring3Radius : Float
 ring3Radius =
     325
-
-
-
--- ring4Color : String
--- ring4Color =
---     "#EEEEEE"
 
 
 ring4Radius : Float
@@ -75,68 +44,93 @@ ring4Radius =
 
 view : Radar -> Html Msg
 view radar =
+    let
+        toolsBlips =
+            List.filter (\blip -> blip.quadrant == Tools) radar
+
+        techniquesBlips =
+            List.filter (\blip -> blip.quadrant == Techniques) radar
+
+        platformsBlips =
+            List.filter (\blip -> blip.quadrant == Platforms) radar
+
+        langsAndFrameworksBlips =
+            List.filter (\blip -> blip.quadrant == LangsAndFrameworks) radar
+    in
     svg
         [ width "800px", height "800px" ]
         [ g
             []
-            [ quadrant UpperRight
-            , quadrant LowerRight
-            , quadrant LowerLeft
-            , quadrant UpperLeft
+            [ quadrant Tools
+            , quadrant Techniques
+            , quadrant Platforms
+            , quadrant LangsAndFrameworks
             ]
         , g
             []
-            (List.map (svgForBlip True) (determineCoordinatesForRadar radar))
+            [ blipsGrouping toolsBlips Tools
+            , blipsGrouping techniquesBlips Techniques
+            , blipsGrouping platformsBlips Platforms
+            , blipsGrouping langsAndFrameworksBlips LangsAndFrameworks
+            ]
         ]
 
 
-quadrant : RingQuadrant -> Svg Msg
-quadrant quadrant =
-    let
-        quadrantClass =
-            case quadrant of
-                UpperRight ->
-                    "quad-tools"
-
-                LowerRight ->
-                    "quad-langsAndFrameworks"
-
-                LowerLeft ->
-                    "quad-platforms"
-
-                UpperLeft ->
-                    "quad-techniques"
-    in
+blipsGrouping : List Blip -> Quadrant -> Svg Msg
+blipsGrouping blips quadrant =
     g
-        [ class quadrantClass ]
+        [ class <| classForQuadrant quadrant ]
+        (List.map (svgForBlip True) (determineCoordinatesForRadar blips))
+
+
+quadrant : Quadrant -> Svg Msg
+quadrant quadrant =
+    g
+        [ class <| classForQuadrant quadrant ]
         (ringsForQuadrant quadrant)
 
 
-ringsForQuadrant : RingQuadrant -> List (Svg Msg)
+classForQuadrant : Quadrant -> String
+classForQuadrant quadrant =
+    case quadrant of
+        Tools ->
+            "quad-tools"
+
+        Techniques ->
+            "quad-langsAndFrameworks"
+
+        Platforms ->
+            "quad-platforms"
+
+        LangsAndFrameworks ->
+            "quad-techniques"
+
+
+ringsForQuadrant : Quadrant -> List (Svg Msg)
 ringsForQuadrant quadrant =
     case quadrant of
-        UpperRight ->
+        Tools ->
             [ g [ class "radar-ring4" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 0 90 ] [] ]
             , g [ class "radar-ring3" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 0 90 ] [] ]
             , g [ class "radar-ring2" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 0 90 ] [] ]
             , g [ class "radar-ring1" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 0 90 ] [] ]
             ]
 
-        LowerRight ->
+        Techniques ->
             [ g [ class "radar-ring4" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 90 180 ] [] ]
             , g [ class "radar-ring3" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 90 180 ] [] ]
             , g [ class "radar-ring2" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 90 180 ] [] ]
             , g [ class "radar-ring1" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 90 180 ] [] ]
             ]
 
-        LowerLeft ->
+        Platforms ->
             [ g [ class "radar-ring4" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 180 270 ] [] ]
             , g [ class "radar-ring3" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 180 270 ] [] ]
             , g [ class "radar-ring2" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 180 270 ] [] ]
             , g [ class "radar-ring1" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 180 270 ] [] ]
             ]
 
-        UpperLeft ->
+        LangsAndFrameworks ->
             [ g [ class "radar-ring4" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 270 360 ] [] ]
             , g [ class "radar-ring3" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 270 360 ] [] ]
             , g [ class "radar-ring2" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 270 360 ] [] ]
