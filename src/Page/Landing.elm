@@ -31,20 +31,19 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         RetrieveRadarData ->
-            let
-                cmd =
-                    findSheetId model.url
-                        |> Maybe.map httpGetSheetById
-                        |> Maybe.withDefault Cmd.none
-            in
-            model ! [ cmd ]
+            case findSheetId model.url of
+                Ok url ->
+                    model ! [ httpGetSheetById url ]
+
+                Err error ->
+                    { model | error_ = Just error } ! []
 
         RetrieveRadarDataSuccess radar ->
-            -- ShowRadar radar Nothing |> noCmd
+            -- This is handled in Main.elm
             model ! []
 
         RetrieveRadarDataFailure error ->
-            { model | error_ = Just error } ! []
+            { model | error_ = Debug.log "error" <| Just error } ! []
 
         UpdateUrl url ->
             { model | url = url } ! []
@@ -55,13 +54,15 @@ sheetIdRegex =
     regex "https:\\/\\/docs.google.com\\/spreadsheets\\/d\\/(.*?)($|\\/$|\\/.*|\\?.*)"
 
 
-findSheetId : String -> Maybe String
+findSheetId : String -> Result String String
 findSheetId url =
     find All sheetIdRegex url
         |> List.head
         |> Maybe.map .submatches
         |> Maybe.map (List.head >> MaybeExtra.join)
-        |> Maybe.withDefault Nothing
+        |> MaybeExtra.join
+        |> Maybe.map Ok
+        |> Maybe.withDefault (Err "Unable to parse Google Sheet ID")
 
 
 sheetJsonUrl : String -> String
@@ -71,7 +72,7 @@ sheetJsonUrl sheetId =
 
 httpResultToMsg : Result Http.Error String -> Msg
 httpResultToMsg result =
-    case result of
+    case Debug.log "result" result of
         Ok csv ->
             let
                 sheetRows =
@@ -99,7 +100,7 @@ httpResultToMsg result =
             RetrieveRadarDataSuccess blips
 
         Err httpError ->
-            RetrieveRadarDataFailure "something bad happened"
+            RetrieveRadarDataFailure "Unable to retrieve Google Sheet"
 
 
 httpGetSheetById : String -> Cmd Msg

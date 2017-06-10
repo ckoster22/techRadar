@@ -57,7 +57,7 @@ updatePage page msg appState =
             in
             ( { appState | page = toModel newModel }, Cmd.map toMsg newCmd )
     in
-    case ( msg, page ) of
+    case ( Debug.log "msg" msg, page ) of
         ( LandingPageMsg (RetrieveRadarDataSuccess blips), LandingPage landingPageModel ) ->
             ( { appState | page = RadarPage (RadarPage.Model blips Nothing) }, Cmd.none )
 
