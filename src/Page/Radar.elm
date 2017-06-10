@@ -7,6 +7,7 @@ import Random.Extra as RandomExtra
 import Svg exposing (Attribute, Svg, g, path, svg, text, text_)
 import Svg.Attributes exposing (class, cx, cy, d, fill, height, r, transform, width, x, y)
 import Svg.Events exposing (onMouseOut, onMouseOver)
+import Util.Svg as SvgUtil
 
 
 type alias Model =
@@ -191,59 +192,32 @@ ringsForQuadrant : Quadrant -> List (Svg Msg)
 ringsForQuadrant quadrant =
     case quadrant of
         Tools ->
-            [ g [ class "radar-ring4" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 0 90 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 0 90 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 0 90 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 0 90 ] [] ]
+            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 0 90 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 0 90 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 0 90 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 0 90 ] [] ]
             ]
 
         Techniques ->
-            [ g [ class "radar-ring4" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 90 180 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 90 180 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 90 180 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 90 180 ] [] ]
+            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 90 180 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 90 180 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 90 180 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 90 180 ] [] ]
             ]
 
         Platforms ->
-            [ g [ class "radar-ring4" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 180 270 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 180 270 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 180 270 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 180 270 ] [] ]
+            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 180 270 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 180 270 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 180 270 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 180 270 ] [] ]
             ]
 
         LangsAndFrameworks ->
-            [ g [ class "radar-ring4" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 270 360 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 270 360 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 270 360 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 270 360 ] [] ]
+            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 270 360 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 270 360 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 270 360 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 270 360 ] [] ]
             ]
-
-
-arc : Float -> Float -> Float -> Float -> Float -> Attribute Msg
-arc x y radius startAngle endAngle =
-    let
-        ( startX, startY ) =
-            polarToCartesian x y radius endAngle
-
-        ( endX, endY ) =
-            polarToCartesian x y radius startAngle
-
-        largeArcFlag =
-            if (endAngle - startAngle) <= 180 then
-                "0"
-            else
-                "1"
-    in
-    d <| "M" ++ toString startX ++ " " ++ toString startY ++ " A " ++ toString radius ++ " " ++ toString radius ++ " 0 " ++ largeArcFlag ++ " 0 " ++ toString endX ++ " " ++ toString endY ++ " L " ++ toString x ++ " " ++ toString y ++ " Z"
-
-
-polarToCartesian : Float -> Float -> Float -> Float -> ( Float, Float )
-polarToCartesian cx cy radius angleDegrees =
-    let
-        angleInRadians =
-            (angleDegrees - 90) * pi / 180
-    in
-    ( cx + radius * cos angleInRadians, cy + radius * sin angleInRadians )
 
 
 radiusesForRing : Ring -> ( Float, Float )
