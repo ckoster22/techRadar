@@ -4,6 +4,7 @@ import Html exposing (Html)
 import Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), determineCoordinatesForRadar, svgForBlip)
 import Svg exposing (Attribute, Svg, g, path, svg)
 import Svg.Attributes exposing (class, cx, cy, d, fill, height, r, width)
+import Svg.Events exposing (onMouseOut, onMouseOver)
 import Types exposing (Msg(..))
 
 
@@ -42,8 +43,8 @@ ring4Radius =
     375
 
 
-view : Radar -> Html Msg
-view radar =
+view : Radar -> Maybe Quadrant -> Html Msg
+view radar highlightQuadrant_ =
     let
         toolsBlips =
             List.filter (\blip -> blip.quadrant == Tools) radar
@@ -61,10 +62,10 @@ view radar =
         [ width "800px", height "800px" ]
         [ g
             []
-            [ quadrant Tools
-            , quadrant Techniques
-            , quadrant Platforms
-            , quadrant LangsAndFrameworks
+            [ quadrant Tools highlightQuadrant_
+            , quadrant Techniques highlightQuadrant_
+            , quadrant Platforms highlightQuadrant_
+            , quadrant LangsAndFrameworks highlightQuadrant_
             ]
         , g
             []
@@ -94,10 +95,13 @@ blipsGrouping blips quadrant =
         )
 
 
-quadrant : Quadrant -> Svg Msg
-quadrant quadrant =
+quadrant : Quadrant -> Maybe Quadrant -> Svg Msg
+quadrant quadrant highlightQuadrant_ =
     g
-        [ class <| classForQuadrant quadrant ]
+        [ class <| classForQuadrant quadrant ++ classForHighlight quadrant highlightQuadrant_
+        , onMouseOver <| MouseoverQuadrant quadrant
+        , onMouseOut <| MouseoutQuadrant
+        ]
         (ringsForQuadrant quadrant)
 
 
@@ -115,6 +119,19 @@ classForQuadrant quadrant =
 
         LangsAndFrameworks ->
             "quad-techniques"
+
+
+classForHighlight : Quadrant -> Maybe Quadrant -> String
+classForHighlight quadrant highlightQuadrant_ =
+    case highlightQuadrant_ of
+        Just highlightQuadrant ->
+            if highlightQuadrant == quadrant then
+                ""
+            else
+                " is-faded"
+
+        Nothing ->
+            ""
 
 
 ringsForQuadrant : Quadrant -> List (Svg Msg)

@@ -1,6 +1,6 @@
 module Types exposing (AppState(..), Msg(..))
 
-import Radar.Model exposing (Radar)
+import Radar.Model exposing (Quadrant, Radar)
 
 
 type Msg
@@ -8,8 +8,10 @@ type Msg
     | RetrieveRadarDataSuccess Radar
     | RetrieveRadarDataFailure String
     | UpdateUrl String
+    | MouseoverQuadrant Quadrant
+    | MouseoutQuadrant
 
 
 type AppState
     = ShowPrompt (Maybe String) (Maybe String)
-    | ShowRadar Radar
+    | ShowRadar Radar (Maybe Quadrant)

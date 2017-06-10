@@ -42,13 +42,30 @@ update msg appState =
                     appState |> noCmd
 
         RetrieveRadarDataSuccess radar ->
-            ShowRadar radar |> noCmd
+            ShowRadar radar Nothing |> noCmd
+
+        RetrieveRadarDataFailure _ ->
+            -- TODO: handle this case
+            appState |> noCmd
 
         UpdateUrl url ->
             ShowPrompt (Just url) Nothing |> noCmd
 
-        _ ->
-            appState |> noCmd
+        MouseoverQuadrant quadrant ->
+            case appState of
+                ShowRadar radar _ ->
+                    ShowRadar radar (Just quadrant) |> noCmd
+
+                _ ->
+                    appState |> noCmd
+
+        MouseoutQuadrant ->
+            case appState of
+                ShowRadar radar _ ->
+                    ShowRadar radar Nothing |> noCmd
+
+                _ ->
+                    appState |> noCmd
 
 
 noCmd : AppState -> ( AppState, Cmd Msg )
@@ -64,8 +81,8 @@ view appState =
                 ShowPrompt url_ error_ ->
                     LandingView.view url_ error_
 
-                ShowRadar radar ->
-                    RadarView.view radar
+                ShowRadar radar highlightQuadrant_ ->
+                    RadarView.view radar highlightQuadrant_
     in
     -- https://github.com/elm-lang/elm-reactor/issues/138
     elmReactorCssWorkaround appView

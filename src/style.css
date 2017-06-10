@@ -29,3 +29,7 @@
     font-style: italic;
     fill: #FFFFFF;
 }
+
+.is-faded {
+    opacity: 0.3;
+}
