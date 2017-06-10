@@ -1,7 +1,6 @@
 module Landing.Util exposing (findSheetId, httpGetSheetById)
 
 import Http
-import Json.Decode exposing (Decoder)
 import Maybe.Extra as MaybeExtra
 import Radar.Model exposing (csvToMaybeBlip)
 import Regex exposing (HowMany(..), Match, Regex, find, regex)
@@ -42,16 +41,17 @@ httpResultToMsg result =
 
                 blips =
                     List.foldl
-                        (\row blips ->
-                            case csvToMaybeBlip row of
+                        (\row ( blips, index ) ->
+                            case csvToMaybeBlip row index of
                                 Just blip ->
-                                    blip :: blips
+                                    ( blip :: blips, index + 1 )
 
                                 Nothing ->
-                                    blips
+                                    ( blips, index + 1 )
                         )
-                        []
+                        ( [], 0 )
                         sheetRows
+                        |> Tuple.first
             in
             RetrieveRadarDataSuccess blips
 

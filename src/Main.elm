@@ -1,6 +1,7 @@
 module Main exposing (main)
 
-import Html exposing (Html)
+import Html exposing (Html, div)
+import Html.Attributes
 import Landing.Util exposing (findSheetId, httpGetSheetById)
 import Landing.View as LandingView
 import Radar.Model exposing (Quadrant(..), Radar, Ring(..))
@@ -20,7 +21,7 @@ main =
 
 init : ( AppState, Cmd Msg )
 init =
-    ShowPrompt Nothing Nothing ! []
+    ShowPrompt (Just "https://docs.google.com/spreadsheets/d/11Fd0lwNIEUs2ymxNEiTfpM5CoQHQbMuOId8TjrQHDn0/edit#gid=0") Nothing ! []
 
 
 update : Msg -> AppState -> ( AppState, Cmd Msg )
@@ -57,9 +58,23 @@ noCmd appState =
 
 view : AppState -> Html Msg
 view appState =
-    case appState of
-        ShowPrompt url_ error_ ->
-            LandingView.view url_ error_
+    let
+        appView =
+            case appState of
+                ShowPrompt url_ error_ ->
+                    LandingView.view url_ error_
 
-        ShowRadar radar ->
-            RadarView.view radar
+                ShowRadar radar ->
+                    RadarView.view radar
+    in
+    -- https://github.com/elm-lang/elm-reactor/issues/138
+    elmReactorCssWorkaround appView
+
+
+elmReactorCssWorkaround : Html Msg -> Html Msg
+elmReactorCssWorkaround appView =
+    div
+        []
+        [ Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "style.css" ] []
+        , appView
+        ]

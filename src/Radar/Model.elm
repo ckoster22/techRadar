@@ -17,6 +17,7 @@ type alias Radar =
 
 type alias Blip =
     { name : String
+    , rowNum : Int
     , ring : Ring
     , quadrant : Quadrant
     , isNew : Bool
@@ -80,13 +81,13 @@ getNew isNewStr =
         Err <| "Invalid isNew value" ++ isNewStr
 
 
-csvToMaybeBlip : String -> Maybe Blip
-csvToMaybeBlip csv =
+csvToMaybeBlip : String -> Int -> Maybe Blip
+csvToMaybeBlip csv index =
     case String.split "," csv of
         name :: ringStr :: quadrantStr :: isNewStr :: description :: _ ->
             case ( getRing ringStr, getQuadrant quadrantStr, getNew isNewStr ) of
                 ( Ok ring, Ok quadrant, Ok isNew ) ->
-                    Just <| Blip name ring quadrant isNew description
+                    Just <| Blip name index ring quadrant isNew description
 
                 _ ->
                     Nothing

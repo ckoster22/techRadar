@@ -3,7 +3,7 @@ module Radar.View exposing (view)
 import Html exposing (Html)
 import Radar.Model exposing (Blip, Quadrant(..), Radar, Ring(..), determineCoordinatesForRadar, svgForBlip)
 import Svg exposing (Attribute, Svg, g, path, svg)
-import Svg.Attributes exposing (cx, cy, d, fill, height, r, width)
+import Svg.Attributes exposing (class, cx, cy, d, fill, height, r, width)
 import Types exposing (Msg(..))
 
 
@@ -24,9 +24,10 @@ radarCy =
     400
 
 
-ring1Color : String
-ring1Color =
-    "#BABABA"
+
+-- ring1Color : String
+-- ring1Color =
+--     "#BABABA"
 
 
 ringPadding : Float
@@ -39,9 +40,10 @@ ring1Radius =
     150
 
 
-ring2Color : String
-ring2Color =
-    "#CACACA"
+
+-- ring2Color : String
+-- ring2Color =
+--     "#CACACA"
 
 
 ring2Radius : Float
@@ -49,9 +51,10 @@ ring2Radius =
     250
 
 
-ring3Color : String
-ring3Color =
-    "#DADADA"
+
+-- ring3Color : String
+-- ring3Color =
+--     "#DADADA"
 
 
 ring3Radius : Float
@@ -59,9 +62,10 @@ ring3Radius =
     325
 
 
-ring4Color : String
-ring4Color =
-    "#EEEEEE"
+
+-- ring4Color : String
+-- ring4Color =
+--     "#EEEEEE"
 
 
 ring4Radius : Float
@@ -75,40 +79,42 @@ view radar =
         [ width "800px", height "800px" ]
         [ g
             []
-            (fourRings ring1Radius ring1Color
-                |> List.append (fourRings ring2Radius ring2Color)
-                |> List.append (fourRings ring3Radius ring3Color)
-                |> List.append (fourRings ring4Radius ring4Color)
-            )
+            [ fourRings ring4Radius "radar-ring4"
+            , fourRings ring3Radius "radar-ring3"
+            , fourRings ring2Radius "radar-ring2"
+            , fourRings ring1Radius "radar-ring1"
+            ]
         , g
             []
             (List.map (svgForBlip True) (determineCoordinatesForRadar radar))
         ]
 
 
-fourRings : Float -> String -> List (Svg Msg)
-fourRings ringRadius ringColor =
-    [ ring UpperRight ringRadius ringColor
-    , ring LowerRight ringRadius ringColor
-    , ring LowerLeft ringRadius ringColor
-    , ring UpperLeft ringRadius ringColor
-    ]
+fourRings : Float -> String -> Svg Msg
+fourRings ringRadius cssClass =
+    g
+        [ class cssClass ]
+        [ ring UpperRight ringRadius
+        , ring LowerRight ringRadius
+        , ring LowerLeft ringRadius
+        , ring UpperLeft ringRadius
+        ]
 
 
-ring : RingQuadrant -> Float -> String -> Svg Msg
-ring quadrant ringRadius ringColor =
+ring : RingQuadrant -> Float -> Svg Msg
+ring quadrant ringRadius =
     case quadrant of
         UpperRight ->
-            path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 0 90, fill ringColor ] []
+            path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 0 90 ] []
 
         LowerRight ->
-            path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ringRadius - ringPadding) 90 180, fill ringColor ] []
+            path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ringRadius - ringPadding) 90 180 ] []
 
         LowerLeft ->
-            path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ringRadius - ringPadding) 180 270, fill ringColor ] []
+            path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ringRadius - ringPadding) 180 270 ] []
 
         UpperLeft ->
-            path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 270 360, fill ringColor ] []
+            path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 270 360 ] []
 
 
 arc : Float -> Float -> Float -> Float -> Float -> Attribute Msg
