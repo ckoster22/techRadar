@@ -33,8 +33,8 @@ update msg model =
     case msg of
         RetrieveRadarData ->
             case findSheetId model.url of
-                Ok url ->
-                    { model | isLoading = True } ! [ httpGetSheetById url ]
+                Ok sheetId ->
+                    { model | isLoading = True } ! [ httpGetSheetById sheetId ]
 
                 Err error ->
                     { model | error_ = Just error } ! []
@@ -64,11 +64,6 @@ findSheetId url =
         |> MaybeExtra.join
         |> Maybe.map Ok
         |> Maybe.withDefault (Err "Unable to parse Google Sheet ID")
-
-
-sheetJsonUrl : String -> String
-sheetJsonUrl sheetId =
-    "http://docs.google.com/spreadsheets/d/" ++ sheetId ++ "/export?gid=0&format=csv"
 
 
 httpResultToMsg : Result Http.Error String -> Msg
@@ -114,6 +109,11 @@ httpGetSheetById sheetId =
     sheetJsonUrl sheetId
         |> Http.getString
         |> Http.send httpResultToMsg
+
+
+sheetJsonUrl : String -> String
+sheetJsonUrl sheetId =
+    "http://docs.google.com/spreadsheets/d/" ++ sheetId ++ "/export?gid=0&format=csv"
 
 
 csvToBlipResult : String -> Int -> Result String GoogleSheetBlip
