@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Data.Radar exposing (GoogleSheetBlip)
 import Html exposing (Html, div)
 import Html.Attributes
 import Page.Landing as LandingPage exposing (Msg(..))
