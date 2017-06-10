@@ -1,12 +1,25 @@
 .radar-ring1 {
-    fill: #BABABA
+    fill: #BABABA;
 }
 .radar-ring2 {
-    fill: #CACACA
+    fill: #CACACA;
 }
 .radar-ring3 {
-    fill: #DADADA
+    fill: #DADADA;
 }
 .radar-ring4 {
-    fill: #EEEEEE
+    fill: #EEEEEE;
+}
+
+.quad-tools {
+    fill: #86B782;
+}
+.quad-langsAndFrameworks {
+    fill: #B32059;
+}
+.quad-platforms {
+    fill: #F38A3E;
+}
+.quad-techniques {
+    fill: #1EBCCD;
 }

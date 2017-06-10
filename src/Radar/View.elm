@@ -79,10 +79,10 @@ view radar =
         [ width "800px", height "800px" ]
         [ g
             []
-            [ fourRings ring4Radius "radar-ring4"
-            , fourRings ring3Radius "radar-ring3"
-            , fourRings ring2Radius "radar-ring2"
-            , fourRings ring1Radius "radar-ring1"
+            [ quadrant UpperRight
+            , quadrant LowerRight
+            , quadrant LowerLeft
+            , quadrant UpperLeft
             ]
         , g
             []
@@ -90,31 +90,58 @@ view radar =
         ]
 
 
-fourRings : Float -> String -> Svg Msg
-fourRings ringRadius cssClass =
+quadrant : RingQuadrant -> Svg Msg
+quadrant quadrant =
+    let
+        quadrantClass =
+            case quadrant of
+                UpperRight ->
+                    "quad-tools"
+
+                LowerRight ->
+                    "quad-langsAndFrameworks"
+
+                LowerLeft ->
+                    "quad-platforms"
+
+                UpperLeft ->
+                    "quad-techniques"
+    in
     g
-        [ class cssClass ]
-        [ ring UpperRight ringRadius
-        , ring LowerRight ringRadius
-        , ring LowerLeft ringRadius
-        , ring UpperLeft ringRadius
-        ]
+        [ class quadrantClass ]
+        (ringsForQuadrant quadrant)
 
 
-ring : RingQuadrant -> Float -> Svg Msg
-ring quadrant ringRadius =
+ringsForQuadrant : RingQuadrant -> List (Svg Msg)
+ringsForQuadrant quadrant =
     case quadrant of
         UpperRight ->
-            path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 0 90 ] []
+            [ g [ class "radar-ring4" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 0 90 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 0 90 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 0 90 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ arc (radarCx + ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 0 90 ] [] ]
+            ]
 
         LowerRight ->
-            path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ringRadius - ringPadding) 90 180 ] []
+            [ g [ class "radar-ring4" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 90 180 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 90 180 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 90 180 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ arc (radarCx + ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 90 180 ] [] ]
+            ]
 
         LowerLeft ->
-            path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ringRadius - ringPadding) 180 270 ] []
+            [ g [ class "radar-ring4" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 180 270 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 180 270 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 180 270 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ arc (radarCx - ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 180 270 ] [] ]
+            ]
 
         UpperLeft ->
-            path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ringRadius - ringPadding) 270 360 ] []
+            [ g [ class "radar-ring4" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 270 360 ] [] ]
+            , g [ class "radar-ring3" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 270 360 ] [] ]
+            , g [ class "radar-ring2" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 270 360 ] [] ]
+            , g [ class "radar-ring1" ] [ path [ arc (radarCx - ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 270 360 ] [] ]
+            ]
 
 
 arc : Float -> Float -> Float -> Float -> Float -> Attribute Msg
