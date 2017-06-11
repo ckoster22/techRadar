@@ -1,20 +1,31 @@
-module Page.Radar exposing (Model, Msg, update, view)
+module Page.Radar exposing (Model, Msg, initialModel, update, view)
 
 import Data.Radar exposing (GoogleSheetBlip, Quadrant(..), Ring(..))
-import Html exposing (Html, div, p)
+import Html exposing (Html, div, h3, li, p, ul)
 import Random exposing (Generator)
 import Random.Extra as RandomExtra
 import Svg exposing (Attribute, Svg, g, path, svg, text, text_)
 import Svg.Attributes exposing (class, cx, cy, d, fill, height, r, transform, width, x, y)
-import Svg.Events exposing (onMouseOut, onMouseOver)
+import Svg.Events exposing (onClick, onMouseOut, onMouseOver)
 import Util.Svg as SvgUtil
 
 
 type alias Model =
     { blips : List GoogleSheetBlip
-    , highlightedQuadrant_ : Maybe Quadrant
+    , selectionState : SelectionState
     , errors_ : Maybe (List String)
     }
+
+
+initialModel : List GoogleSheetBlip -> Maybe (List String) -> Model
+initialModel blips errors_ =
+    Model blips NoHighlightOrSelection errors_
+
+
+type SelectionState
+    = NoHighlightOrSelection
+    | Highlight Quadrant
+    | Select Quadrant
 
 
 type alias PositionedBlip =
@@ -30,16 +41,30 @@ type alias Position =
 type Msg
     = MouseoverQuadrant Quadrant
     | MouseoutQuadrant
+    | OnQuadrantClick Quadrant
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         MouseoverQuadrant quadrant ->
-            { model | highlightedQuadrant_ = Just quadrant } ! []
+            case model.selectionState of
+                NoHighlightOrSelection ->
+                    { model | selectionState = Highlight quadrant } ! []
+
+                _ ->
+                    model ! []
 
         MouseoutQuadrant ->
-            { model | highlightedQuadrant_ = Nothing } ! []
+            case model.selectionState of
+                Highlight _ ->
+                    { model | selectionState = NoHighlightOrSelection } ! []
+
+                _ ->
+                    model ! []
+
+        OnQuadrantClick quadrant ->
+            { model | selectionState = Select quadrant } ! []
 
 
 
@@ -100,27 +125,49 @@ view model =
 
         langsAndFrameworksBlips =
             List.filter (\blip -> blip.quadrant == LangsAndFrameworks) model.blips
+
+        highlightedQuadrant_ =
+            case model.selectionState of
+                Highlight quadrant ->
+                    Just quadrant
+
+                Select quadrant ->
+                    Just quadrant
+
+                _ ->
+                    Nothing
+
+        selectedQuadrant_ =
+            case model.selectionState of
+                Select quadrant ->
+                    Just quadrant
+
+                _ ->
+                    Nothing
     in
     div
-        []
-        [ errorSection model.errors_
-        , svg
-            [ width "800px", height "800px" ]
-            [ g
-                []
-                [ quadrant Tools model.highlightedQuadrant_
-                , quadrant Techniques model.highlightedQuadrant_
-                , quadrant Platforms model.highlightedQuadrant_
-                , quadrant LangsAndFrameworks model.highlightedQuadrant_
-                ]
-            , g
-                []
-                [ blipsGrouping toolsBlips Tools
-                , blipsGrouping techniquesBlips Techniques
-                , blipsGrouping platformsBlips Platforms
-                , blipsGrouping langsAndFrameworksBlips LangsAndFrameworks
+        [ class "radar-container" ]
+        [ div []
+            [ errorSection model.errors_
+            , svg
+                [ width "800px", height "800px" ]
+                [ g
+                    []
+                    [ quadrant Tools highlightedQuadrant_
+                    , quadrant LangsAndFrameworks highlightedQuadrant_
+                    , quadrant Platforms highlightedQuadrant_
+                    , quadrant Techniques highlightedQuadrant_
+                    ]
+                , g
+                    []
+                    [ blipsGrouping toolsBlips Tools
+                    , blipsGrouping techniquesBlips Techniques
+                    , blipsGrouping platformsBlips Platforms
+                    , blipsGrouping langsAndFrameworksBlips LangsAndFrameworks
+                    ]
                 ]
             ]
+        , detailsSection selectedQuadrant_ model.blips
         ]
 
 
@@ -134,6 +181,54 @@ errorSection errors_ =
 
         Nothing ->
             text ""
+
+
+detailsSection : Maybe Quadrant -> List GoogleSheetBlip -> Html Msg
+detailsSection selectedQuadrant_ blips =
+    case selectedQuadrant_ of
+        Just quadrant ->
+            let
+                ( adoptBlips, trialBlips, assessBlips, holdBlips ) =
+                    blips
+                        |> List.filter (\blip -> blip.quadrant == quadrant)
+                        |> List.foldl
+                            (\blip ( adopt, trial, assess, hold ) ->
+                                case blip.ring of
+                                    Adopt ->
+                                        ( blip :: adopt, trial, assess, hold )
+
+                                    Trial ->
+                                        ( adopt, blip :: trial, assess, hold )
+
+                                    Assess ->
+                                        ( adopt, trial, blip :: assess, hold )
+
+                                    Hold ->
+                                        ( adopt, trial, assess, blip :: hold )
+                            )
+                            ( [], [], [], [] )
+            in
+            div
+                []
+                [ detailsForRing "Adopt" adoptBlips
+                , detailsForRing "Trial" trialBlips
+                , detailsForRing "Assess" assessBlips
+                , detailsForRing "Hold" holdBlips
+                ]
+
+        Nothing ->
+            text ""
+
+
+detailsForRing : String -> List GoogleSheetBlip -> Html Msg
+detailsForRing ringName blips =
+    div
+        []
+        [ h3 [] [ text ringName ]
+        , ul
+            []
+            (List.map (\blip -> li [] [ text blip.name ]) blips)
+        ]
 
 
 blipsGrouping : List GoogleSheetBlip -> Quadrant -> Svg Msg
@@ -155,6 +250,7 @@ quadrant quadrant highlightQuadrant_ =
         [ class <| "quad " ++ classForQuadrant quadrant ++ classForHighlight quadrant highlightQuadrant_
         , onMouseOver <| MouseoverQuadrant quadrant
         , onMouseOut <| MouseoutQuadrant
+        , onClick <| OnQuadrantClick quadrant
         ]
         (ringsForQuadrant quadrant)
 
@@ -166,13 +262,13 @@ classForQuadrant quadrant =
             "quad-tools"
 
         Techniques ->
-            "quad-langsAndFrameworks"
+            "quad-techniques"
 
         Platforms ->
             "quad-platforms"
 
         LangsAndFrameworks ->
-            "quad-techniques"
+            "quad-langsAndFrameworks"
 
 
 classForHighlight : Quadrant -> Maybe Quadrant -> String
@@ -195,13 +291,13 @@ ringsForQuadrant quadrant =
             fourRings (radarCx + ringPadding) (radarCy - ringPadding) 0
 
         Techniques ->
-            fourRings (radarCx + ringPadding) (radarCy + ringPadding) 90
+            fourRings (radarCx - ringPadding) (radarCy - ringPadding) 270
 
         Platforms ->
             fourRings (radarCx - ringPadding) (radarCy + ringPadding) 180
 
         LangsAndFrameworks ->
-            fourRings (radarCx - ringPadding) (radarCy - ringPadding) 270
+            fourRings (radarCx + ringPadding) (radarCy + ringPadding) 90
 
 
 fourRings : Float -> Float -> Float -> List (Svg Msg)

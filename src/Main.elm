@@ -43,7 +43,7 @@ update msg page =
     in
     case ( msg, page ) of
         ( LandingPageMsg (RetrieveRadarDataSuccess blips errors_), LandingPage landingPageModel ) ->
-            ( RadarPage (RadarPage.Model blips Nothing errors_), Cmd.none )
+            ( RadarPage (RadarPage.initialModel blips errors_), Cmd.none )
 
         ( LandingPageMsg landingPageMsg, LandingPage landingPageModel ) ->
             toPage LandingPage LandingPageMsg LandingPage.update landingPageMsg landingPageModel
@@ -59,14 +59,14 @@ view : Page -> Html Msg
 view page =
     let
         appView =
-            viewPage False page
+            viewPage page
     in
     -- https://github.com/elm-lang/elm-reactor/issues/138
     elmReactorCssWorkaround appView
 
 
-viewPage : Bool -> Page -> Html Msg
-viewPage isLoading page =
+viewPage : Page -> Html Msg
+viewPage page =
     case page of
         LandingPage model ->
             LandingPage.view model

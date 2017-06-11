@@ -2,7 +2,7 @@ module Page.Landing exposing (Model, Msg(..), initialModel, update, view)
 
 import Data.Radar exposing (GoogleSheetBlip, Quadrant(..), Ring(..))
 import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (type_, value)
+import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Maybe.Extra as MaybeExtra
@@ -176,7 +176,7 @@ getNew isNewStr =
 view : Model -> Html Msg
 view model =
     div
-        []
+        [ class "inputContainer" ]
         [ urlInput model.url
         , showRadarButton model.isLoading
         , text <| Maybe.withDefault "" <| model.error_
@@ -187,8 +187,10 @@ urlInput : String -> Html Msg
 urlInput url =
     input
         [ type_ "text"
+        , class "sheetInput"
         , value url
         , onInput UpdateUrl
+        , placeholder "e.g. https://docs.google.com/spreadsheets/d/1waDG0_W3-yNiAaUfxcZhTKvl7AUCgXwQw8mdPjCz86U/"
         ]
         []
 
@@ -196,7 +198,9 @@ urlInput url =
 showRadarButton : Bool -> Html Msg
 showRadarButton isLoading =
     button
-        [ onClick RetrieveRadarData ]
+        [ onClick RetrieveRadarData
+        , class "sheetInputButton"
+        ]
         [ text <| buttonText isLoading ]
 
 
