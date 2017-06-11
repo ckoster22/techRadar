@@ -192,32 +192,25 @@ ringsForQuadrant : Quadrant -> List (Svg Msg)
 ringsForQuadrant quadrant =
     case quadrant of
         Tools ->
-            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 0 90 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 0 90 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 0 90 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 0 90 ] [] ]
-            ]
+            fourRings (radarCx + ringPadding) (radarCy - ringPadding) 0
 
         Techniques ->
-            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 90 180 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 90 180 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 90 180 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx + ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 90 180 ] [] ]
-            ]
+            fourRings (radarCx + ringPadding) (radarCy + ringPadding) 90
 
         Platforms ->
-            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring4Radius - ringPadding) 180 270 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring3Radius - ringPadding) 180 270 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring2Radius - ringPadding) 180 270 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy + ringPadding) (ring1Radius - ringPadding) 180 270 ] [] ]
-            ]
+            fourRings (radarCx - ringPadding) (radarCy + ringPadding) 180
 
         LangsAndFrameworks ->
-            [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring4Radius - ringPadding) 270 360 ] [] ]
-            , g [ class "radar-ring3" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring3Radius - ringPadding) 270 360 ] [] ]
-            , g [ class "radar-ring2" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring2Radius - ringPadding) 270 360 ] [] ]
-            , g [ class "radar-ring1" ] [ path [ SvgUtil.arc (radarCx - ringPadding) (radarCy - ringPadding) (ring1Radius - ringPadding) 270 360 ] [] ]
-            ]
+            fourRings (radarCx - ringPadding) (radarCy - ringPadding) 270
+
+
+fourRings : Float -> Float -> Float -> List (Svg Msg)
+fourRings x y startAngle =
+    [ g [ class "radar-ring4" ] [ path [ SvgUtil.arc x y (ring4Radius - ringPadding) startAngle (startAngle + 90) ] [] ]
+    , g [ class "radar-ring3" ] [ path [ SvgUtil.arc x y (ring3Radius - ringPadding) startAngle (startAngle + 90) ] [] ]
+    , g [ class "radar-ring2" ] [ path [ SvgUtil.arc x y (ring2Radius - ringPadding) startAngle (startAngle + 90) ] [] ]
+    , g [ class "radar-ring1" ] [ path [ SvgUtil.arc x y (ring1Radius - ringPadding) startAngle (startAngle + 90) ] [] ]
+    ]
 
 
 radiusesForRing : Ring -> ( Float, Float )
