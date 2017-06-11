@@ -139,7 +139,7 @@ errorSection errors_ =
 blipsGrouping : List GoogleSheetBlip -> Quadrant -> Svg Msg
 blipsGrouping blips quadrant =
     g
-        [ class <| classForQuadrant quadrant ]
+        [ class <| "quad " ++ classForQuadrant quadrant ]
         (blips
             |> determineCoordinatesForRadar
             |> List.map
@@ -292,10 +292,10 @@ startAngleForQuadrant : Quadrant -> Float
 startAngleForQuadrant quadrant =
     case quadrant of
         Tools ->
-            0
+            pi / 2
 
         Techniques ->
-            pi / 2
+            0
 
         Platforms ->
             -pi / 2

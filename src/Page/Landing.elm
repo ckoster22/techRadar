@@ -89,7 +89,7 @@ httpResultToMsg result =
                                 Err error ->
                                     ( blips, error :: errors, index + 1 )
                         )
-                        ( [], [], 0 )
+                        ( [], [], 1 )
                         sheetRows
                         |> (\( blips, errors, _ ) ->
                                 if List.length errors == 0 then
