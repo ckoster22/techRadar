@@ -113,7 +113,7 @@ httpGetSheetById sheetId =
 
 sheetJsonUrl : String -> String
 sheetJsonUrl sheetId =
-    "http://docs.google.com/spreadsheets/d/" ++ sheetId ++ "/export?gid=0&format=csv"
+    "https://docs.google.com/spreadsheets/d/" ++ sheetId ++ "/export?gid=0&format=csv"
 
 
 csvToBlipResult : String -> Int -> Result String GoogleSheetBlip
