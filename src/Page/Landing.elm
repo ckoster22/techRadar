@@ -6,7 +6,7 @@ import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Maybe.Extra as MaybeExtra
-import Regex exposing (HowMany(..), Match, Regex, find, regex)
+import Regex exposing (Match, Regex, find, fromString)
 
 
 type alias Model =
@@ -34,36 +34,51 @@ update msg model =
         RetrieveRadarData ->
             case findSheetId model.url of
                 Ok sheetId ->
-                    { model | isLoading = True } ! [ httpGetSheetById sheetId ]
+                    ( { model | isLoading = True }
+                    , httpGetSheetById sheetId
+                    )
 
                 Err error ->
-                    { model | error_ = Just error } ! []
+                    ( { model | error_ = Just error }
+                    , Cmd.none
+                    )
 
         RetrieveRadarDataSuccess _ _ ->
             -- This is handled in Main.elm
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         RetrieveRadarDataFailure error ->
-            { model | error_ = Just error, isLoading = False } ! []
+            ( { model | error_ = Just error, isLoading = False }
+            , Cmd.none
+            )
 
         UpdateUrl url ->
-            { model | url = url } ! []
+            ( { model | url = url }
+            , Cmd.none
+            )
 
 
-sheetIdRegex : Regex
-sheetIdRegex =
-    regex "https:\\/\\/docs.google.com\\/spreadsheets\\/d\\/(.*?)($|\\/$|\\/.*|\\?.*)"
+maybeSheetIdRegex : Maybe Regex
+maybeSheetIdRegex =
+    fromString "https:\\/\\/docs.google.com\\/spreadsheets\\/d\\/(.*?)($|\\/$|\\/.*|\\?.*)"
 
 
 findSheetId : String -> Result String String
 findSheetId url =
-    find All sheetIdRegex url
-        |> List.head
-        |> Maybe.map .submatches
-        |> Maybe.map (List.head >> MaybeExtra.join)
-        |> MaybeExtra.join
-        |> Maybe.map Ok
-        |> Maybe.withDefault (Err "Unable to parse Google Sheet ID")
+    case maybeSheetIdRegex of
+        Nothing ->
+            Err "internal error: illegal regex"
+
+        Just sheetIdRegex ->
+            find sheetIdRegex url
+                |> List.head
+                |> Maybe.map .submatches
+                |> Maybe.map (List.head >> MaybeExtra.join)
+                |> MaybeExtra.join
+                |> Maybe.map Ok
+                |> Maybe.withDefault (Err "Unable to parse Google Sheet ID")
 
 
 httpResultToMsg : Result Http.Error String -> Msg
@@ -72,7 +87,7 @@ httpResultToMsg result =
         Ok csv ->
             let
                 sheetRows =
-                    case String.split "\x0D\n" csv of
+                    case String.split "\u{000D}\n" csv of
                         title :: rest ->
                             rest
 
@@ -81,21 +96,22 @@ httpResultToMsg result =
 
                 ( blips, errors ) =
                     List.foldl
-                        (\row ( blips, errors, index ) ->
-                            case csvToBlipResult row index of
+                        (\row ( blips1, errors1, index1 ) ->
+                            case csvToBlipResult row index1 of
                                 Ok blip ->
-                                    ( blip :: blips, errors, index + 1 )
+                                    ( blip :: blips1, errors1, index1 + 1 )
 
                                 Err error ->
-                                    ( blips, error :: errors, index + 1 )
+                                    ( blips1, error :: errors1, index1 + 1 )
                         )
                         ( [], [], 1 )
                         sheetRows
-                        |> (\( blips, errors, _ ) ->
-                                if List.length errors == 0 then
-                                    ( blips, Nothing )
+                        |> (\( blips1, errors1, _ ) ->
+                                if List.length errors1 == 0 then
+                                    ( blips1, Nothing )
+
                                 else
-                                    ( blips, Just errors )
+                                    ( blips1, Just errors1 )
                            )
             in
             RetrieveRadarDataSuccess blips errors
@@ -135,12 +151,16 @@ getRing : String -> Result String Ring
 getRing ringStr =
     if ringStr == "hold" then
         Ok Hold
+
     else if ringStr == "assess" then
         Ok Assess
+
     else if ringStr == "trial" then
         Ok Trial
+
     else if ringStr == "adopt" then
         Ok Adopt
+
     else
         Err <| "Invalid ring value" ++ ringStr
 
@@ -149,12 +169,16 @@ getQuadrant : String -> Result String Quadrant
 getQuadrant quadrantStr =
     if quadrantStr == "tools" then
         Ok Tools
+
     else if quadrantStr == "techniques" then
         Ok Techniques
+
     else if quadrantStr == "platforms" then
         Ok Platforms
+
     else if quadrantStr == "languages & frameworks" then
         Ok LangsAndFrameworks
+
     else
         Err <| "Invalid quadrant value" ++ quadrantStr
 
@@ -163,8 +187,10 @@ getNew : String -> Result String Bool
 getNew isNewStr =
     if isNewStr == "TRUE" then
         Ok True
+
     else if isNewStr == "FALSE" then
         Ok False
+
     else
         Err <| "Invalid isNew value" ++ isNewStr
 
@@ -208,5 +234,6 @@ buttonText : Bool -> String
 buttonText isLoading =
     if isLoading then
         "Please wait.."
+
     else
         "Show radar"

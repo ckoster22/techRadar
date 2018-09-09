@@ -16,10 +16,11 @@ arc x y radius startAngle endAngle =
         largeArcFlag =
             if (endAngle - startAngle) <= 180 then
                 "0"
+
             else
                 "1"
     in
-    d <| "M" ++ toString startX ++ " " ++ toString startY ++ " A " ++ toString radius ++ " " ++ toString radius ++ " 0 " ++ largeArcFlag ++ " 0 " ++ toString endX ++ " " ++ toString endY ++ " L " ++ toString x ++ " " ++ toString y ++ " Z"
+    d <| "M" ++ String.fromFloat startX ++ " " ++ String.fromFloat startY ++ " A " ++ String.fromFloat radius ++ " " ++ String.fromFloat radius ++ " 0 " ++ largeArcFlag ++ " 0 " ++ String.fromFloat endX ++ " " ++ String.fromFloat endY ++ " L " ++ String.fromFloat x ++ " " ++ String.fromFloat y ++ " Z"
 
 
 polarToCartesian : Float -> Float -> Float -> Float -> ( Float, Float )
