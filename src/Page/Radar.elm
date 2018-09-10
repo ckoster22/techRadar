@@ -3,7 +3,6 @@ module Page.Radar exposing (Model, Msg, initialModel, update, view)
 import Data.Radar exposing (GoogleSheetBlip, Quadrant(..), Ring(..))
 import Html exposing (Html, div, h3, li, p, ul)
 import Random exposing (Generator)
-import Random.Extra as RandomExtra
 import Svg exposing (Attribute, Svg, g, path, svg, text, text_)
 import Svg.Attributes exposing (class, cx, cy, d, fill, height, r, transform, width, x, y)
 import Svg.Events exposing (onClick, onMouseOut, onMouseOver)
@@ -50,21 +49,31 @@ update msg model =
         MouseoverQuadrant quadrant ->
             case model.selectionState of
                 NoHighlightOrSelection ->
-                    { model | selectionState = Highlight quadrant } ! []
+                    ( { model | selectionState = Highlight quadrant }
+                    , Cmd.none
+                    )
 
                 _ ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
         MouseoutQuadrant ->
             case model.selectionState of
                 Highlight _ ->
-                    { model | selectionState = NoHighlightOrSelection } ! []
+                    ( { model | selectionState = NoHighlightOrSelection }
+                    , Cmd.none
+                    )
 
                 _ ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
         OnQuadrantClick quadrant ->
-            { model | selectionState = Select quadrant } ! []
+            ( { model | selectionState = Select quadrant }
+            , Cmd.none
+            )
 
 
 
@@ -153,10 +162,10 @@ view model =
                 [ width "800px", height "800px" ]
                 [ g
                     []
-                    [ quadrant Tools highlightedQuadrant_
-                    , quadrant LangsAndFrameworks highlightedQuadrant_
-                    , quadrant Platforms highlightedQuadrant_
-                    , quadrant Techniques highlightedQuadrant_
+                    [ makeQuadrant Tools highlightedQuadrant_
+                    , makeQuadrant LangsAndFrameworks highlightedQuadrant_
+                    , makeQuadrant Platforms highlightedQuadrant_
+                    , makeQuadrant Techniques highlightedQuadrant_
                     ]
                 , g
                     []
@@ -188,25 +197,25 @@ detailsSection selectedQuadrant_ blips =
     case selectedQuadrant_ of
         Just quadrant ->
             let
-                ( adoptBlips, trialBlips, assessBlips, holdBlips ) =
+                ( ( adoptBlips, trialBlips ), ( assessBlips, holdBlips ) ) =
                     blips
                         |> List.filter (\blip -> blip.quadrant == quadrant)
                         |> List.foldl
-                            (\blip ( adopt, trial, assess, hold ) ->
+                            (\blip ( ( adopt, trial ), ( assess, hold ) ) ->
                                 case blip.ring of
                                     Adopt ->
-                                        ( blip :: adopt, trial, assess, hold )
+                                        ( ( blip :: adopt, trial ), ( assess, hold ) )
 
                                     Trial ->
-                                        ( adopt, blip :: trial, assess, hold )
+                                        ( ( adopt, blip :: trial ), ( assess, hold ) )
 
                                     Assess ->
-                                        ( adopt, trial, blip :: assess, hold )
+                                        ( ( adopt, trial ), ( blip :: assess, hold ) )
 
                                     Hold ->
-                                        ( adopt, trial, assess, blip :: hold )
+                                        ( ( adopt, trial ), ( assess, blip :: hold ) )
                             )
-                            ( [], [], [], [] )
+                            ( ( [], [] ), ( [], [] ) )
             in
             div
                 []
@@ -244,8 +253,8 @@ blipsGrouping blips quadrant =
         )
 
 
-quadrant : Quadrant -> Maybe Quadrant -> Svg Msg
-quadrant quadrant highlightQuadrant_ =
+makeQuadrant : Quadrant -> Maybe Quadrant -> Svg Msg
+makeQuadrant quadrant highlightQuadrant_ =
     g
         [ class <| "quad " ++ classForQuadrant quadrant ++ classForHighlight quadrant highlightQuadrant_
         , onMouseOver <| MouseoverQuadrant quadrant
@@ -277,6 +286,7 @@ classForHighlight quadrant highlightQuadrant_ =
         Just highlightQuadrant ->
             if highlightQuadrant == quadrant then
                 ""
+
             else
                 " is-faded"
 
@@ -331,6 +341,7 @@ svgForBlip position rowNum isNew =
         blipPathSvg =
             if isNew then
                 triangleBlip position
+
             else
                 circleBlip position
     in
@@ -339,10 +350,10 @@ svgForBlip position rowNum isNew =
         [ blipPathSvg
         , text_
             [ class "blip"
-            , x <| toString (position.x - 4)
-            , y <| toString (position.y + 2)
+            , x <| String.fromFloat (position.x - 4)
+            , y <| String.fromFloat (position.y + 2)
             ]
-            [ text <| toString rowNum ]
+            [ text <| String.fromInt rowNum ]
         ]
 
 
@@ -350,7 +361,7 @@ triangleBlip : Position -> Svg msg
 triangleBlip pos =
     path
         [ d "M412.201,311.406c0.021,0,0.042,0,0.063,0c0.067,0,0.135,0,0.201,0c4.052,0,6.106-0.051,8.168-0.102c2.053-0.051,4.115-0.102,8.176-0.102h0.103c6.976-0.183,10.227-5.306,6.306-11.53c-3.988-6.121-4.97-5.407-8.598-11.224c-1.631-3.008-3.872-4.577-6.179-4.577c-2.276,0-4.613,1.528-6.48,4.699c-3.578,6.077-3.26,6.014-7.306,11.723C402.598,306.067,405.426,311.406,412.201,311.406"
-        , transform <| "scale(" ++ toString (blipWidth / 34) ++ ") translate(" ++ toString (-404 + pos.x * (34 / blipWidth) - 17) ++ ", " ++ toString (-282 + pos.y * (34 / blipWidth) - 17) ++ ")"
+        , transform <| "scale(" ++ String.fromFloat (blipWidth / 34) ++ ") translate(" ++ String.fromFloat (-404 + pos.x * (34 / blipWidth) - 17) ++ ", " ++ String.fromFloat (-282 + pos.y * (34 / blipWidth) - 17) ++ ")"
         ]
         []
 
@@ -359,7 +370,7 @@ circleBlip : Position -> Svg msg
 circleBlip pos =
     path
         [ d "M420.084,282.092c-1.073,0-2.16,0.103-3.243,0.313c-6.912,1.345-13.188,8.587-11.423,16.874c1.732,8.141,8.632,13.711,17.806,13.711c0.025,0,0.052,0,0.074-0.003c0.551-0.025,1.395-0.011,2.225-0.109c4.404-0.534,8.148-2.218,10.069-6.487c1.747-3.886,2.114-7.993,0.913-12.118C434.379,286.944,427.494,282.092,420.084,282.092"
-        , transform <| "scale(" ++ toString (blipWidth / 34) ++ ") translate(" ++ toString (-404 + pos.x * (34 / blipWidth) - 17) ++ ", " ++ toString (-282 + pos.y * (34 / blipWidth) - 17) ++ ")"
+        , transform <| "scale(" ++ String.fromFloat (blipWidth / 34) ++ ") translate(" ++ String.fromFloat (-404 + pos.x * (34 / blipWidth) - 17) ++ ", " ++ String.fromFloat (-282 + pos.y * (34 / blipWidth) - 17) ++ ")"
         ]
         []
 
@@ -406,8 +417,9 @@ findCoordForBlip iteration blip positions =
         (\randPosition ->
             if doesCoordinateCollide randPosition positions && iteration < 100 then
                 findCoordForBlip (iteration + 1) blip positions
+
             else
-                PositionedBlip blip randPosition |> RandomExtra.constant
+                PositionedBlip blip randPosition |> Random.constant
         )
         (randomBlipCoordinates blip.ring (startAngleForQuadrant blip.quadrant))
 
@@ -445,6 +457,7 @@ randomAngleFromRadius radius =
         angleDelta =
             if initialDelta > 45 then
                 45
+
             else
                 initialDelta
     in

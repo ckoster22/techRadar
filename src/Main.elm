@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Browser
 import Html exposing (Html, div)
 import Html.Attributes
 import Page.Landing as LandingPage exposing (Msg(..))
@@ -16,10 +17,10 @@ type Msg
     | RadarPageMsg RadarPage.Msg
 
 
-main : Program Never Page Msg
+main : Program () Page Msg
 main =
-    Html.program
-        { init = init
+    Browser.element
+        { init = \() -> init
         , update = update
         , subscriptions = \_ -> Sub.none
         , view = view
@@ -52,7 +53,9 @@ update msg page =
             toPage RadarPage RadarPageMsg RadarPage.update radarPageMsg radarPageModel
 
         ( _, _ ) ->
-            page ! []
+            ( page
+            , Cmd.none
+            )
 
 
 view : Page -> Html Msg
